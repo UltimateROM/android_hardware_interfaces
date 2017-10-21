@@ -35,18 +35,18 @@ Gatekeeper::Gatekeeper()
     if (!ret) {
         ret = gatekeeper_open(module, &device);
     }
-    if (ret < 0) {
-        LOG_ALWAYS_FATAL_IF(ret < 0, "Unable to open GateKeeper HAL");
-    }
+    //if (ret < 0) {
+    //    LOG_ALWAYS_FATAL_IF(ret < 0, "Unable to open GateKeeper HAL");
+    //}
 }
 
 Gatekeeper::~Gatekeeper()
 {
     if (device != nullptr) {
         int ret = gatekeeper_close(device);
-        if (ret < 0) {
-            ALOGE("Unable to close GateKeeper HAL");
-        }
+        //if (ret < 0) {
+        //    ALOGE("Unable to close GateKeeper HAL");
+        //}
     }
     dlclose(module->dso);
 }
