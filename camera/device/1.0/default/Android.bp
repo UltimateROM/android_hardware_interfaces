@@ -30,6 +30,9 @@ cc_library_shared {
     include_dirs: [
         "frameworks/native/include/media/openmax"
     ],
+    cflags: [
+	"-DTARGET_USES_NON_TREBLE_CAMERA"
+    ],
     export_include_dirs: ["."]
 }
 
