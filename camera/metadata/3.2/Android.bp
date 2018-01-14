@@ -32,16 +32,13 @@ genrule {
     ],
 }
 
-cc_library {
+cc_library_shared {
     name: "android.hardware.camera.metadata@3.2",
     defaults: ["hidl-module-defaults"],
     generated_sources: ["android.hardware.camera.metadata@3.2_genc++"],
     generated_headers: ["android.hardware.camera.metadata@3.2_genc++_headers"],
     export_generated_headers: ["android.hardware.camera.metadata@3.2_genc++_headers"],
     vendor_available: true,
-    vndk: {
-        enabled: true,
-    },
     shared_libs: [
         "libhidlbase",
         "libhidltransport",

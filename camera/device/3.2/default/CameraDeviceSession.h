@@ -55,8 +55,6 @@ using ::android::hardware::hidl_string;
 using ::android::sp;
 using ::android::Mutex;
 
-struct Camera3Stream;
-
 /**
  * Function pointer types with C calling convention to
  * use for HAL callback functions.
@@ -71,12 +69,12 @@ extern "C" {
         const camera3_notify_msg_t *);
 }
 
-struct CameraDeviceSession : public virtual RefBase, protected camera3_callback_ops  {
+struct CameraDeviceSession : public ICameraDeviceSession, private camera3_callback_ops  {
 
     CameraDeviceSession(camera3_device_t*,
                         const camera_metadata_t* deviceInfo,
                         const sp<ICameraDeviceCallback>&);
-    virtual ~CameraDeviceSession();
+    ~CameraDeviceSession();
     // Call by CameraDevice to dump active device states
     void dumpState(const native_handle_t* fd);
     // Caller must use this method to check if CameraDeviceSession ctor failed
@@ -85,35 +83,23 @@ struct CameraDeviceSession : public virtual RefBase, protected camera3_callback_
     void disconnect();
     bool isClosed();
 
-    // Retrieve the HIDL interface, split into its own class to avoid inheritance issues when
-    // dealing with minor version revs and simultaneous implementation and interface inheritance
-    virtual sp<ICameraDeviceSession> getInterface() {
-        return new TrampolineSessionInterface_3_2(this);
-    }
-
-protected:
-
-    // Methods from ::android::hardware::camera::device::V3_2::ICameraDeviceSession follow
-
+    // Methods from ::android::hardware::camera::device::V3_2::ICameraDeviceSession follow.
     Return<void> constructDefaultRequestSettings(
-            RequestTemplate type,
-            ICameraDeviceSession::constructDefaultRequestSettings_cb _hidl_cb);
+            RequestTemplate type, constructDefaultRequestSettings_cb _hidl_cb) override;
     Return<void> configureStreams(
-            const StreamConfiguration& requestedConfiguration,
-            ICameraDeviceSession::configureStreams_cb _hidl_cb);
+            const StreamConfiguration& requestedConfiguration, configureStreams_cb _hidl_cb) override;
     Return<void> getCaptureRequestMetadataQueue(
-        ICameraDeviceSession::getCaptureRequestMetadataQueue_cb _hidl_cb);
+        getCaptureRequestMetadataQueue_cb _hidl_cb) override;
     Return<void> getCaptureResultMetadataQueue(
-        ICameraDeviceSession::getCaptureResultMetadataQueue_cb _hidl_cb);
+        getCaptureResultMetadataQueue_cb _hidl_cb) override;
     Return<void> processCaptureRequest(
             const hidl_vec<CaptureRequest>& requests,
             const hidl_vec<BufferCache>& cachesToRemove,
-            ICameraDeviceSession::processCaptureRequest_cb _hidl_cb);
-    Return<Status> flush();
-    Return<void> close();
+            processCaptureRequest_cb _hidl_cb) override;
+    Return<Status> flush() override;
+    Return<void> close() override;
 
-protected:
-
+private:
     // protecting mClosed/mDisconnected/mInitFail
     mutable Mutex mStateLock;
     // device is closed either
@@ -162,7 +148,6 @@ protected:
     static HandleImporter sHandleImporter;
 
     bool mInitFail;
-    bool mFirstRequest = false;
 
     common::V1_0::helper::CameraMetadata mDeviceInfo;
 
@@ -316,52 +301,6 @@ protected:
      */
     static callbacks_process_capture_result_t sProcessCaptureResult;
     static callbacks_notify_t sNotify;
-
-private:
-
-    struct TrampolineSessionInterface_3_2 : public ICameraDeviceSession {
-        TrampolineSessionInterface_3_2(sp<CameraDeviceSession> parent) :
-                mParent(parent) {}
-
-        virtual Return<void> constructDefaultRequestSettings(
-                V3_2::RequestTemplate type,
-                V3_2::ICameraDeviceSession::constructDefaultRequestSettings_cb _hidl_cb) override {
-            return mParent->constructDefaultRequestSettings(type, _hidl_cb);
-        }
-
-        virtual Return<void> configureStreams(
-                const V3_2::StreamConfiguration& requestedConfiguration,
-                V3_2::ICameraDeviceSession::configureStreams_cb _hidl_cb) override {
-            return mParent->configureStreams(requestedConfiguration, _hidl_cb);
-        }
-
-        virtual Return<void> processCaptureRequest(const hidl_vec<V3_2::CaptureRequest>& requests,
-                const hidl_vec<V3_2::BufferCache>& cachesToRemove,
-                V3_2::ICameraDeviceSession::processCaptureRequest_cb _hidl_cb) override {
-            return mParent->processCaptureRequest(requests, cachesToRemove, _hidl_cb);
-        }
-
-        virtual Return<void> getCaptureRequestMetadataQueue(
-                V3_2::ICameraDeviceSession::getCaptureRequestMetadataQueue_cb _hidl_cb) override  {
-            return mParent->getCaptureRequestMetadataQueue(_hidl_cb);
-        }
-
-        virtual Return<void> getCaptureResultMetadataQueue(
-                V3_2::ICameraDeviceSession::getCaptureResultMetadataQueue_cb _hidl_cb) override  {
-            return mParent->getCaptureResultMetadataQueue(_hidl_cb);
-        }
-
-        virtual Return<Status> flush() override {
-            return mParent->flush();
-        }
-
-        virtual Return<void> close() override {
-            return mParent->close();
-        }
-
-    private:
-        sp<CameraDeviceSession> mParent;
-    };
 };
 
 }  // namespace implementation
