@@ -17,9 +17,8 @@
 #ifndef ANDROID_HARDWARE_GRAPHICS_COMPOSER_V2_1_HWC_H
 #define ANDROID_HARDWARE_GRAPHICS_COMPOSER_V2_1_HWC_H
 
-#include <condition_variable>
-#include <memory>
 #include <mutex>
+#include <memory>
 #include <unordered_set>
 #include <vector>
 
@@ -212,7 +211,6 @@ private:
     } mDispatch;
 
     std::mutex mClientMutex;
-    std::condition_variable mClientDestroyedWait;
     wp<ComposerClient> mClient;
 
     // If the HWC implementation version is < 2.0, use an adapter to interface
