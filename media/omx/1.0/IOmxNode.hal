@@ -140,6 +140,14 @@ interface IOmxNode {
             Status status
         );
 
+    storeMetaDataInBuffers(
+            uint32_t port_index,
+            bool enable,
+            int32_t type
+        )  generates (
+            Status status
+        );
+
     /**
      * Prepare a port for adaptive playback. This is based on the extension
      * "OMX.google.android.index.prepareForAdaptivePlayback".
