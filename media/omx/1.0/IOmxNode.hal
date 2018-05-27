@@ -144,9 +144,29 @@ interface IOmxNode {
             uint32_t port_index,
             bool enable,
             int32_t type
-        )  generates (
+        ) generates (
             Status status
         );
+
+    useBuffer_legacy(
+       ) generates (
+            Status status
+       );
+
+    fillBuffer_legacy(
+       ) generates (
+            Status status
+       );
+
+    emptyBuffer_legacy(
+       ) generates (
+            Status status
+       );
+
+    allocateBufferWithBackup(
+       ) generates (
+            Status status
+       );
 
     /**
      * Prepare a port for adaptive playback. This is based on the extension
